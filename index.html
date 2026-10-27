@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual Ofrenda — Ghost in the Machine & Día de los Muertos Altar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Dynamic Atmospheric Light Overlay -->
+  <div class="light-field" id="lightField"></div>
+
+  <!-- Background Particle & Smoke Physics Canvas -->
+  <canvas id="atmosphereCanvas"></canvas>
+
+  <!-- Papel Picado Banner Header -->
+  <header class="papel-picado-garland">
+    <div class="pennant p-orange"><span>✦</span></div>
+    <div class="pennant p-magenta"><span>💀</span></div>
+    <div class="pennant p-gold"><span>🌼</span></div>
+    <div class="pennant p-cyan"><span>🕯️</span></div>
+    <div class="pennant p-purple"><span>✦</span></div>
+    <div class="pennant p-orange"><span>🦋</span></div>
+    <div class="pennant p-magenta"><span>💀</span></div>
+    <div class="pennant p-gold"><span>🌼</span></div>
+    <div class="pennant p-cyan"><span>🕯️</span></div>
+    <div class="pennant p-purple"><span>✦</span></div>
+  </header>
+
+  <!-- Main App Shell -->
+  <div class="app-shell">
+    <div class="header-banner">
+      <div class="header-tags">
+        <span class="badge">Día de los Muertos</span>
+        <span class="badge glow">Ghost in the Machine</span>
+        <span class="badge">Open Weights & Privacy First</span>
+      </div>
+      <h1>Gran Altar de Recuerdos</h1>
+      <p class="lead">An offline, privacy-first sanctuary for cherished ancestors, beloved companions, and digital pioneers. Powered by local open-weight AI.</p>
+    </div>
+
+    <!-- Quick Action / Audio Control Bar -->
+    <div class="control-toolbar">
+      <div class="toolbar-group">
+        <button id="addSoulBtn" class="btn btn-primary">
+          <span class="btn-icon">🕯️</span> Place Soul on Altar
+        </button>
+        <button id="toggleMusicBtn" class="btn btn-secondary">
+          <span class="btn-icon" id="soundIcon">🔇</span> <span id="soundLabel">Atmospheric Drone (Off)</span>
+        </button>
+      </div>
+      <div class="toolbar-group">
+        <div class="volume-slider-wrap">
+          <label for="volumeSlider">Volume</label>
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.35" />
+        </div>
+        <button id="exportBtn" class="btn btn-outline" title="Export Memorial JSON">
+          <span>💾 Backup</span>
+        </button>
+        <label for="importInput" class="btn btn-outline" title="Restore Memorial JSON">
+          <span>📂 Restore</span>
+        </label>
+        <input type="file" id="importInput" accept=".json" style="display:none;" />
+      </div>
+    </div>
+
+    <!-- Interactive Offering Placement Deck -->
+    <div class="offering-deck-card">
+      <div class="deck-header">
+        <span class="deck-title">Tradición Ceremonial • Tap or Drag Offerings to the Altar Tiers</span>
+        <span class="deck-counter" id="activeOfferingCounter">Offerings Placed: 0</span>
+      </div>
+      <div class="deck-items">
+        <div class="deck-item" draggable="true" data-type="pan" title="Pan de Muerto (Nourishment for the long journey)">
+          <span class="item-emoji">🍞</span>
+          <span class="item-name">Pan de Muerto</span>
+        </div>
+        <div class="deck-item" draggable="true" data-type="calavera" title="Sugar Skull (Celebration of mortality)">
+          <span class="item-emoji">💀</span>
+          <span class="item-name">Calavera</span>
+        </div>
+        <div class="deck-item" draggable="true" data-type="mezcal" title="Mezcal & Copita (To quench spiritual thirst)">
+          <span class="item-emoji">🍶</span>
+          <span class="item-name">Mezcal</span>
+        </div>
+        <div class="deck-item" draggable="true" data-type="marigold" title="Cempasúchil Garland (Golden path of scent and light)">
+          <span class="item-emoji">🌼</span>
+          <span class="item-name">Marigolds</span>
+        </div>
+        <div class="deck-item" draggable="true" data-type="monarch" title="Monarch Butterfly (Soul messengers returning)">
+          <span class="item-emoji">🦋</span>
+          <span class="item-name">Monarch</span>
+        </div>
+        <div class="deck-item" draggable="true" data-type="guitar" title="Guitarra (Melodies carried across the veil)">
+          <span class="item-emoji">🎸</span>
+          <span class="item-name">Guitarra</span>
+        </div>
+        <div class="deck-item" draggable="true" data-type="floppy" title="Ghost in the Machine (Preserving forgotten code)">
+          <span class="item-emoji">💾</span>
+          <span class="item-name">Floppy Disk</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- The 3-Tier Sacred Altar Architecture -->
+    <main class="altar-stage" id="altarStage">
+
+      <!-- TIER 1: The Heavens & Spirits -->
+      <section class="altar-tier tier-sky" id="tier1" data-tier="1">
+        <div class="tier-label">
+          <span class="tier-icon">✨</span>
+          <span>Nivel 1: El Reino de las Almas (Portraits & Votive Flame)</span>
+        </div>
+        <div class="souls-grid" id="soulsGrid">
+          <!-- Dynamic Portraits generated by JS -->
+        </div>
+        <div class="tier-dropzone" id="tier1Drop">
+          <span class="drop-hint">Drop or tap ceremonial offerings here</span>
+        </div>
+      </section>
+
+      <!-- TIER 2: The Feast & Journey -->
+      <section class="altar-tier tier-earth" id="tier2" data-tier="2">
+        <div class="tier-label">
+          <span class="tier-icon">🏺</span>
+          <span>Nivel 2: El Banquete y la Memoria (The Feast, Sustenance & Earthly Loves)</span>
+        </div>
+        <div class="tier-shelf-items" id="tier2Offerings">
+          <!-- Dynamic Offerings placed here -->
+        </div>
+      </section>
+
+      <!-- TIER 3: The 4 Sacred Elements -->
+      <section class="altar-tier tier-underworld" id="tier3" data-tier="3">
+        <div class="tier-label">
+          <span class="tier-icon">🔥</span>
+          <span>Nivel 3: Los Cuatro Elementos (Fuego, Agua, Tierra, Viento)</span>
+        </div>
+        <div class="elements-grid">
+          <!-- Water Element -->
+          <div class="element-card" title="Agua: Calms the spirits' thirst after their journey">
+            <div class="element-glyph">💧</div>
+            <div class="element-title">Agua Pura</div>
+            <div class="element-sub">Vessel of Life</div>
+          </div>
+          <!-- Salt / Earth Element -->
+          <div class="element-card" title="Sal y Tierra: Purification and anchor to origin">
+            <div class="element-glyph">🧂</div>
+            <div class="element-title">Cruz de Sal</div>
+            <div class="element-sub">Purification</div>
+          </div>
+          <!-- Copal Smoke Element -->
+          <div class="element-card" id="incenseCard" title="Copal: Purifies the air and raises prayers">
+            <div class="element-glyph">💨</div>
+            <div class="element-title">Copal Sagrado</div>
+            <div class="element-sub">Smoke of Memory</div>
+          </div>
+          <!-- Votive Fire Element -->
+          <div class="element-card votive-rack" id="votiveRack" title="Votive Bank: Click candles to ignite flames">
+            <div class="votive-row">
+              <span class="votive-candle lit" data-idx="0">🕯️</span>
+              <span class="votive-candle lit" data-idx="1">🕯️</span>
+              <span class="votive-candle lit" data-idx="2">🕯️</span>
+              <span class="votive-candle lit" data-idx="3">🕯️</span>
+            </div>
+            <div class="element-title">Lumbre Sagrada</div>
+            <div class="element-sub">Guidance Flame</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: Add / Edit Soul -->
+  <div class="modal-backdrop" id="soulModal" aria-hidden="true">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="modalTitle">🕯️ Inscribe Soul upon the Altar</h2>
+        <button class="modal-close" id="closeModalBtn">&times;</button>
+      </div>
+      <form id="soulForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="soulName">Name of the Departed *</label>
+            <input type="text" id="soulName" placeholder="e.g., Abuela Elena, Dennis Ritchie" required />
+          </div>
+          <div class="form-group">
+            <label for="soulYears">Lifespan / Epoch</label>
+            <input type="text" id="soulYears" placeholder="e.g., 1941 – 2011" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="soulCategory">Spirit Archetype</label>
+            <select id="soulCategory">
+              <option value="ancestor">Cherished Ancestor / Family</option>
+              <option value="companion">Beloved Pet / Animal Companion</option>
+              <option value="pioneer">Open Source Pioneer / Digital Ghost</option>
+              <option value="artist">Poet, Artist, or Cultural Hero</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="photoFile">Memorial Portrait (Processed Locally)</label>
+            <input type="file" id="photoFile" accept="image/*" />
+            <input type="hidden" id="photoDataUrl" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="eulogy-header">
+            <label for="soulEulogy">Remembrance & Tribute *</label>
+            <div class="ai-button-strip">
+              <button type="button" class="btn-mini" id="genCalaveritaBtn" title="Compose traditional Mexican satirical rhyming verse">
+                ✨ Calaverita Literaria
+              </button>
+              <button type="button" class="btn-mini" id="genCyberpunkBtn" title="Compose Ghost in the Machine cyberpunk tech ode">
+                💾 Ghost in Machine Ode
+              </button>
+              <button type="button" class="btn-mini" id="genSolemnBtn" title="Compose traditional solemn memorial prose">
+                🕊️ Solemn Eulogy
+              </button>
+            </div>
+          </div>
+          <textarea id="soulEulogy" rows="4" placeholder="Share a cherished memory, favorite joke, or code legacy..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="soulOfferings">Favorite Earthly Delights (Comma-separated)</label>
+          <input type="text" id="soulOfferings" placeholder="Pan dulce, Black coffee, C++ manuals, Acoustic guitar" />
+        </div>
+
+        <!-- Ollama Customization Drawer -->
+        <details class="ollama-drawer">
+          <summary>⚙️ Local Open-Weight AI Settings (Ollama offline inference)</summary>
+          <div class="ollama-settings">
+            <p class="ollama-note">Runs entirely on your machine via Ollama. No token fees, zero data leaves your browser.</p>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ollamaHost">Ollama Host</label>
+                <input type="text" id="ollamaHost" value="http://localhost:11434" />
+              </div>
+              <div class="form-group">
+                <label for="ollamaModel">Local Model</label>
+                <input type="text" id="ollamaModel" value="llama3.2:1b" placeholder="llama3.2:1b, mistral, qwen2.5" />
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveSoulBtn">Light Candle & Honor Soul</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Printable Parchment Keepsake Card -->
+  <div class="modal-backdrop" id="keepsakeModal" aria-hidden="true">
+    <div class="keepsake-panel">
+      <button class="modal-close" id="closeKeepsakeBtn">&times;</button>
+      <div class="parchment-card" id="printableCard">
+        <div class="parchment-border">
+          <div class="parchment-header">
+            <span class="p-symbol">🌼</span>
+            <span class="p-title">En Memoria Eterna</span>
+            <span class="p-symbol">🕯️</span>
+          </div>
+          <div class="parchment-photo-wrap" id="kPhotoWrap">
+            <img id="kPhoto" src="" alt="Portrait" />
+          </div>
+          <h2 id="kName" class="parchment-name">Soul Name</h2>
+          <div id="kYears" class="parchment-years">1900 – 2000</div>
+          <p id="kEulogy" class="parchment-eulogy">Tribute text here...</p>
+          <div class="parchment-offerings" id="kOfferings"></div>
+          <div class="parchment-footer">
+            <span>Día de los Muertos Altar • Ghost in the Machine</span>
+          </div>
+        </div>
+      </div>
+      <div class="keepsake-actions">
+        <button class="btn btn-primary" id="printCardBtn">🖨️ Print or Save PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
